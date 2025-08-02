@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Breaker - Password Cracking Game</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3243152138999761" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-center;
+            margin-bottom: 2rem;
+        }
+
+        .header-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .icon-bg {
+            padding: 8px;
+            background: #dbeafe;
+            border-radius: 8px;
+        }
+
+        .lock-icon {
+            width: 24px;
+            height: 24px;
+            color: #2563eb;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .attempt-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .input-section {
+            padding: 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .digit-input {
+            width: 64px;
+            height: 64px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .digit-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .submit-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .secondary-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .hint-btn, .new-game-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .hint-btn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .hint-btn:hover {
+            background: #fde68a;
+        }
+
+        .new-game-btn {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .new-game-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .hint-section {
+            padding: 16px;
+            background: #fffbeb;
+            border-bottom: 1px solid #fde68a;
+        }
+
+        .hint-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .hint-icon {
+            width: 20px;
+            height: 20px;
+            color: #d97706;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .hint-title {
+            font-weight: 500;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+
+        .hint-text {
+            font-size: 0.875rem;
+            color: #a16207;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .victory-section {
+            padding: 24px;
+            background: #f0fdf4;
+            border-bottom: 1px solid #bbf7d0;
+            text-align: center;
+        }
+
+        .trophy-icon {
+            width: 64px;
+            height: 64px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .trophy-svg {
+            width: 32px;
+            height: 32px;
+            color: #16a34a;
+        }
+
+        .victory-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #14532d;
+            margin-bottom: 4px;
+        }
+
+        .victory-text {
+            color: #15803d;
+            margin-bottom: 16px;
+        }
+
+        .secret-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .play-again-btn {
+            padding: 12px 24px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .play-again-btn:hover {
+            background: #15803d;
+        }
+
+        .history-section {
+            padding: 24px;
+        }
+
+        .history-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-dot {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+        }
+
+        .history-list {
+            max-height: 256px;
+            overflow-y: auto;
+        }
+
+        .guess-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .guess-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .guess-number {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #64748b;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .guess-digits {
+            display: flex;
+            gap: 4px;
+        }
+
+        .guess-digit {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .guess-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guess-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .guess-feedback {
+            font-size: 0.875rem;
+            color: #64748b;
+            text-align: right;
+            max-width: 140px;
+        }
+
+        .instructions {
+            padding: 24px;
+            background: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .instructions-title {
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .instructions-list {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .icon-success { color: #10b981; }
+        .icon-error { color: #ef4444; }
+        .icon-warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">
+                <div class="icon-bg">
+                    <svg class="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-9a2 2 0 00-2-2H6a2 2 0 00-2 2v9a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h1>Code Breaker</h1>
+            </div>
+            <p class="subtitle">Crack the 3-digit code with unique numbers</p>
+            
+            <div id="attemptCounter" class="attempt-counter hidden">
+                <div class="status-dot"></div>
+                <span id="attemptText">Attempt 1</span>
+            </div>
+        </div>
+
+        <!-- Main Game Card -->
+        <div class="game-card">
+            <!-- Input Section -->
+            <div id="inputSection" class="input-section">
+                <div class="input-row">
+                    <input type="text" class="digit-input" maxlength="1" id="input0" inputmode="numeric">
+                    <input type="text" class="digit-input" maxlength="1" id="input1" inputmode="numeric">
+                    <input type="text" class="digit-input" maxlength="1" id="input2" inputmode="numeric">
+                </div>
+                
+                <div class="button-group">
+                    <button id="submitBtn" class="submit-btn" disabled>
+                        Submit Guess
+                    </button>
+                    
+                    <div class="secondary-buttons">
+                        <button id="hintBtn" class="hint-btn">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Hint
+                        </button>
+                        
+                        <button id="newGameBtn" class="new-game-btn">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            New Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hint Section -->
+            <div id="hintSection" class="hint-section hidden">
+                <div class="hint-header">
+                    <svg class="hint-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <div>
+                        <div class="hint-title">Smart Hint</div>
+                        <div id="hintText" class="hint-text">Enter your first guess to get started!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Victory Section -->
+            <div id="victorySection" class="victory-section hidden">
+                <div class="trophy-icon">
+                    <svg class="trophy-svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="victory-title">Success!</h2>
+                    <p class="victory-text">
+                        Code <span id="secretCodeDisplay" class="secret-code"></span> cracked in <span id="attemptsUsed"></span> <span id="attemptWord">attempts</span>
+                    </p>
+                </div>
+                <button id="playAgainBtn" class="play-again-btn">
+                    Play Again
+                </button>
+            </div>
+
+            <!-- Guess History -->
+            <div id="historySection" class="history-section hidden">
+                <h3 class="history-title">
+                    <div class="history-dot"></div>
+                    Previous Attempts
+                </h3>
+                <div id="historyList" class="history-list"></div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions">
+                <div class="instructions-title">How to play:</div>
+                <div class="instructions-list">
+                    • Enter 3 unique digits (0-9)<br>
+                    • Use clues to find the secret code<br>
+                    • Press Enter or click Submit
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PasswordCracker {
+            constructor() {
+                this.secretCode = '';
+                this.currentGuess = ['', '', ''];
+                this.guesses = [];
+                this.gameWon = false;
+                this.showHint = false;
+                this.isSubmitting = false;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.resetGame();
+            }
+
+            initializeElements() {
+                this.inputs = [
+                    document.getElementById('input0'),
+                    document.getElementById('input1'),
+                    document.getElementById('input2')
+                ];
+                this.submitBtn = document.getElementById('submitBtn');
+                this.hintBtn = document.getElementById('hintBtn');
+                this.newGameBtn = document.getElementById('newGameBtn');
+                this.playAgainBtn = document.getElementById('playAgainBtn');
+                
+                this.inputSection = document.getElementById('inputSection');
+                this.hintSection = document.getElementById('hintSection');
+                this.victorySection = document.getElementById('victorySection');
+                this.historySection = document.getElementById('historySection');
+                this.attemptCounter = document.getElementById('attemptCounter');
+                
+                this.hintText = document.getElementById('hintText');
+                this.secretCodeDisplay = document.getElementById('secretCodeDisplay');
+                this.attemptsUsed = document.getElementById('attemptsUsed');
+                this.attemptWord = document.getElementById('attemptWord');
+                this.attemptText = document.getElementById('attemptText');
+                this.historyList = document.getElementById('historyList');
+            }
+
+            setupEventListeners() {
+                this.inputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => this.handleInputChange(index, e.target.value));
+                    input.addEventListener('keydown', (e) => this.handleKeyDown(e, index));
+                });
+
+                this.submitBtn.addEventListener('click', () => this.handleSubmitGuess());
+                this.hintBtn.addEventListener('click', () => this.toggleHint());
+                this.newGameBtn.addEventListener('click', () => this.resetGame());
+                this.playAgainBtn.addEventListener('click', () => this.resetGame());
+            }
+
+            generateSecretCode() {
+                const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+                const code = [];
+                
+                for (let i = 0; i < 3; i++) {
+                    const randomIndex = Math.floor(Math.random() * digits.length);
+                    code.push(digits[randomIndex]);
+                    digits.splice(randomIndex, 1);
+                }
+                
+                return code.join('');
+            }
+
+            handleInputChange(index, value) {
+                if (!/^\d?$/.test(value)) return;
+                
+                this.currentGuess[index] = value;
+                this.inputs[index].value = value;
+                
+                // Auto-focus next input
+                if (value && index < 2) {
+                    this.inputs[index + 1].focus();
+                }
+                
+                this.updateSubmitButton();
+            }
+
+            handleKeyDown(e, index) {
+                if (e.key === 'Backspace' && !this.currentGuess[index] && index > 0) {
+                    this.inputs[index - 1].focus();
+                }
+                if (e.key === 'Enter' && this.isValidGuess()) {
+                    this.handleSubmitGuess();
+                }
+            }
+
+            updateSubmitButton() {
+                const isValid = this.isValidGuess();
+                this.submitBtn.disabled = !isValid || this.isSubmitting;
+            }
+
+            isValidGuess() {
+                const hasAllDigits = this.currentGuess.every(digit => digit !== '');
+                const uniqueDigits = new Set(this.currentGuess.filter(d => d !== ''));
+                return hasAllDigits && uniqueDigits.size === 3;
+            }
+
+            async handleSubmitGuess() {
+                if (!this.isValidGuess() || this.isSubmitting) return;
+                
+                // Check for duplicate digits
+                const guess = this.currentGuess.join('');
+                const uniqueDigits = new Set(guess);
+                if (uniqueDigits.size !== 3) {
+                    alert('Each digit must be unique!');
+                    return;
+                }
+
+                this.isSubmitting = true;
+                this.submitBtn.innerHTML = '<div class="spinner"></div> Checking...';
+                this.submitBtn.disabled = true;
+                
+                // Small delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const feedback = this.generateFeedback(guess, this.secretCode);
+                const feedbackText = this.getFeedbackText(feedback.correctPosition, feedback.correctDigitWrongPosition);
+                
+                const newGuess = {
+                    guess: guess,
+                    feedback: feedbackText,
+                    correctPosition: feedback.correctPosition,
+                    correctDigitWrongPosition: feedback.correctDigitWrongPosition
+                };
+
+                this.guesses.push(newGuess);
+                
+                if (guess === this.secretCode) {
+                    this.gameWon = true;
+                    this.showVictory();
+                } else {
+                    this.currentGuess = ['', '', ''];
+                    this.inputs.forEach((input, i) => {
+                        input.value = '';
+                    });
+                    this.inputs[0].focus();
+                }
+                
+                this.updateHistory();
+                this.updateAttemptCounter();
+                
+                this.isSubmitting = false;
+                this.submitBtn.innerHTML = 'Submit Guess';
+                this.updateSubmitButton();
+            }
+
+            generateFeedback(guess, secret) {
+                const guessDigits = guess.split('');
+                const secretDigits = secret.split('');
+                
+                let correctPosition = 0;
+                let correctDigitWrongPosition = 0;
+                
+                // Count correct positions
+                for (let i = 0; i < 3; i++) {
+                    if (guessDigits[i] === secretDigits[i]) {
+                        correctPosition++;
+                    }
+                }
+                
+                // Count correct digits in wrong positions
+                const secretCopy = [...secretDigits];
+                const guessCopy = [...guessDigits];
+                
+                // Remove correctly positioned digits
+                for (let i = 2; i >= 0; i--) {
+                    if (guessDigits[i] === secretDigits[i]) {
+                        secretCopy.splice(i, 1);
+                        guessCopy.splice(i, 1);
+                    }
+                }
+                
+                // Count remaining matches
+                for (let digit of guessCopy) {
+                    const index = secretCopy.indexOf(digit);
+                    if (index !== -1) {
+                        correctDigitWrongPosition++;
+                        secretCopy.splice(index, 1);
+                    }
+                }
+                
+                return { correctPosition, correctDigitWrongPosition };
+            }
+
+            getFeedbackText(correctPosition, correctDigitWrongPosition) {
+                if (correctPosition === 3) {
+                    return "Perfect! You cracked the code!";
+                } else if (correctPosition === 0 && correctDigitWrongPosition === 0) {
+                    return "Nothing is correct";
+                } else if (correctPosition === 1 && correctDigitWrongPosition === 0) {
+                    return "One number is correct and well placed";
+                } else if (correctPosition === 0 && correctDigitWrongPosition === 1) {
+                    return "One number is correct but wrongly placed";
+                } else if (correctPosition === 0 && correctDigitWrongPosition === 2) {
+                    return "Two numbers are correct but wrongly placed";
+                } else if (correctPosition === 0 && correctDigitWrongPosition === 3) {
+                    return "All numbers are correct but wrongly placed";
+                } else if (correctPosition === 1 && correctDigitWrongPosition === 1) {
+                    return "One correct & well placed, one correct but wrong position";
+                } else if (correctPosition === 1 && correctDigitWrongPosition === 2) {
+                    return "One correct & well placed, two correct but wrong positions";
+                } else if (correctPosition === 2 && correctDigitWrongPosition === 0) {
+                    return "Two numbers are correct and well placed";
+                } else if (correctPosition === 2 && correctDigitWrongPosition === 1) {
+                    return "Two correct & well placed, one correct but wrong position";
+                }
+                return "Invalid feedback state";
+            }
+
+            toggleHint() {
+                this.showHint = !this.showHint;
+                if (this.showHint) {
+                    this.hintSection.classList.remove('hidden');
+                    this.hintText.textContent = this.generateHint();
+                    this.hintBtn.innerHTML = `
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Hide
+                    `;
+                } else {
+                    this.hintSection.classList.add('hidden');
+                    this.hintBtn.innerHTML = `
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Hint
+                    `;
+                }
+            }
+
+            generateHint() {
+                if (this.guesses.length === 0) return "Enter your first guess to get started!";
+                
+                const excludedDigits = new Set();
+                const includedDigits = new Set();
+                
+                this.guesses.forEach(({ guess, correctPosition, correctDigitWrongPosition }) => {
+                    if (correctPosition === 0 && correctDigitWrongPosition === 0) {
+                        guess.split('').forEach(digit => excludedDigits.add(digit));
+                    } else if (correctPosition > 0 || correctDigitWrongPosition > 0) {
+                        guess.split('').forEach(digit => {
+                            if (!excludedDigits.has(digit)) {
+                                includedDigits.add(digit);
+                            }
+                        });
+                    }
+                });
+
+                let hints = [];
+                if (excludedDigits.size > 0) {
+                    hints.push(`❌ Not in code: ${Array.from(excludedDigits).sort().join(', ')}`);
+                }
+                if (includedDigits.size > 0) {
+                    hints.push(`✅ In the code: ${Array.from(includedDigits).sort().join(', ')}`);
+                }
+                if (hints.length === 0) {
+                    hints.push("🤔 Try different combinations!");
+                }
+                
+                return hints.join('\n');
+            }
+
+            showVictory() {
+                this.inputSection.classList.add('hidden');
+                this.hintSection.classList.add('hidden');
+                this.victorySection.classList.remove('hidden');
+                
+                this.secretCodeDisplay.textContent = this.secretCode;
+                this.attemptsUsed.textContent = this.guesses.length;
+                this.attemptWord.textContent = this.guesses.length === 1 ? 'attempt' : 'attempts';
+            }
+
+            updateAttemptCounter() {
+                if (this.guesses.length > 0 && !this.gameWon) {
+                    this.attemptCounter.classList.remove('hidden');
+                    this.attemptText.textContent = `Attempt ${this.guesses.length + 1}`;
+                }
+            }
+
+            updateHistory() {
+                if (this.guesses.length > 0) {
+                    this.historySection.classList.remove('hidden');
+                    this.historyList.innerHTML = '';
+                    
+                    this.guesses.forEach((entry, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'guess-item';
+                        
+                        const iconClass = entry.correctPosition === 3 ? 'icon-success' : 
+                                         (entry.correctPosition === 0 && entry.correctDigitWrongPosition === 0) ? 'icon-error' : 'icon-warning';
+                        
+                        const icon = entry.correctPosition === 3 ? 
+                            '<svg class="guess-icon icon-success" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' :
+                            (entry.correctPosition === 0 && entry.correctDigitWrongPosition === 0) ?
+                            '<svg class="guess-icon icon-error" fill="currentColor" viewBox="0 0 24 24"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' :
+                            '<svg class="guess-icon icon-warning" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                        
+                        item.innerHTML = `
+                            <div class="guess-left">
+                                <span class="guess-number">${index + 1}</span>
+                                <div class="guess-digits">
+                                    ${entry.guess.split('').map(digit => `<div class="guess-digit">${digit}</div>`).join('')}
+                                </div>
+                            </div>
+                            <div class="guess-right">
+                                ${icon}
+                                <span class="guess-feedback">${entry.feedback}</span>
+                            </div>
+                        `;
+                        
+                        this.historyList.appendChild(item);
+                    });
+                }
+            }
+
+            resetGame() {
+                this.secretCode = this.generateSecretCode();
+                this.currentGuess = ['', '', ''];
+                this.guesses = [];
+                this.gameWon = false;
+                this.showHint = false;
+                this.isSubmitting = false;
+                
+                // Reset UI
+                this.inputs.forEach((input, i) => {
+                    input.value = '';
+                });
+                
+                this.inputSection.classList.remove('hidden');
+                this.hintSection.classList.add('hidden');
+                this.victorySection.classList.add('hidden');
+                this.historySection.classList.add('hidden');
+                this.attemptCounter.classList.add('hidden');
+                
+                this.hintBtn.innerHTML = `
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Hint
+                `;
+                
+                this.updateSubmitButton();
+                this.inputs[0].focus();
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new PasswordCracker();
+        });
+    </script>
+</body>
+</html>
